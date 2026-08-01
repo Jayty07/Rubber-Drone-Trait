@@ -1,0 +1,268 @@
+diff --git a/Content.Server/_HL/Body/InnateInternalsSystem.cs b/Content.Server/_HL/Body/InnateInternalsSystem.cs
+new file mode 100644
+index 000000000..4d807c8c6
+--- /dev/null
++++ b/Content.Server/_HL/Body/InnateInternalsSystem.cs
+@@ -0,0 +1,62 @@
++using Content.Shared._HL.Body;
++using Content.Shared.Actions;
++using Content.Shared.Atmos.Components;
++using Content.Shared.Body.Components;
++using Content.Shared.Body.Systems;
++using Robust.Shared.Containers;
++
++namespace Content.Server._HL.Body;
++
++/// <summary>
++/// Spawns the built in breathing apparatus of an <see cref="InnateInternalsComponent"/> and keeps it
++/// wired into the entity's internals.
++/// </summary>
++public sealed class InnateInternalsSystem : EntitySystem
++{
++    [Dependency] private readonly SharedActionsSystem _actions = default!;
++    [Dependency] private readonly SharedContainerSystem _container = default!;
++    [Dependency] private readonly SharedInternalsSystem _internals = default!;
++
++    public override void Initialize()
++    {
++        base.Initialize();
++
++        SubscribeLocalEvent<InnateInternalsComponent, MapInitEvent>(OnMapInit);
++        SubscribeLocalEvent<InnateInternalsComponent, ComponentShutdown>(OnShutdown);
++    }
++
++    private void OnMapInit(Entity<InnateInternalsComponent> ent, ref MapInitEvent args)
++    {
++        if (!TryComp<InternalsComponent>(ent, out var internals))
++            return;
++
++        _container.EnsureContainer<Container>(ent, ent.Comp.ContainerId);
++
++        var tool = SpawnInContainerOrDrop(ent.Comp.BreathTool, ent, ent.Comp.ContainerId);
++        var tank = SpawnInContainerOrDrop(ent.Comp.GasTank, ent, ent.Comp.ContainerId);
++
++        ent.Comp.BreathToolEntity = tool;
++        ent.Comp.GasTankEntity = tank;
++
++        _internals.ConnectBreathTool((ent, internals), tool);
++
++        // The tank never ends up in hands or inventory, so hand out its internals toggle directly.
++        if (TryComp<GasTankComponent>(tank, out var gasTank))
++        {
++            _actions.AddAction(ent, ref gasTank.ToggleActionEntity, gasTank.ToggleAction, tank);
++            Dirty(tank, gasTank);
++        }
++    }
++
++    private void OnShutdown(Entity<InnateInternalsComponent> ent, ref ComponentShutdown args)
++    {
++        if (TryComp<InternalsComponent>(ent, out var internals) && ent.Comp.BreathToolEntity is { } tool)
++            _internals.DisconnectBreathTool((ent, internals), tool, forced: true);
++
++        QueueDel(ent.Comp.BreathToolEntity);
++        QueueDel(ent.Comp.GasTankEntity);
++
++        ent.Comp.BreathToolEntity = null;
++        ent.Comp.GasTankEntity = null;
++    }
++}
+diff --git a/Content.Server/_HL/Nutrition/SealedMouthSystem.cs b/Content.Server/_HL/Nutrition/SealedMouthSystem.cs
+new file mode 100644
+index 000000000..8e1f7589c
+--- /dev/null
++++ b/Content.Server/_HL/Nutrition/SealedMouthSystem.cs
+@@ -0,0 +1,26 @@
++using Content.Shared._HL.Nutrition;
++using Content.Shared.Nutrition;
++using Content.Shared.Popups;
++
++namespace Content.Server._HL.Nutrition;
++
++public sealed class SealedMouthSystem : EntitySystem
++{
++    [Dependency] private readonly SharedPopupSystem _popup = default!;
++
++    public override void Initialize()
++    {
++        base.Initialize();
++
++        SubscribeLocalEvent<SealedMouthComponent, IngestionAttemptEvent>(OnIngestAttempt);
++    }
++
++    private void OnIngestAttempt(EntityUid uid, SealedMouthComponent component, IngestionAttemptEvent args)
++    {
++        if (args.Cancelled)
++            return;
++
++        args.Cancel();
++        _popup.PopupEntity(Loc.GetString(component.Popup), uid, uid);
++    }
++}
+diff --git a/Content.Shared/_HL/Body/InnateInternalsComponent.cs b/Content.Shared/_HL/Body/InnateInternalsComponent.cs
+new file mode 100644
+index 000000000..ba821231e
+--- /dev/null
++++ b/Content.Shared/_HL/Body/InnateInternalsComponent.cs
+@@ -0,0 +1,37 @@
++using Robust.Shared.GameStates;
++using Robust.Shared.Prototypes;
++
++namespace Content.Shared._HL.Body;
++
++/// <summary>
++/// Gives the entity a self contained breathing apparatus. A breath tool and a gas tank are spawned
++/// inside the entity and wired into its internals, so it can run internals without a mask or a
++/// carried tank.
++/// </summary>
++[RegisterComponent, NetworkedComponent]
++public sealed partial class InnateInternalsComponent : Component
++{
++    /// <summary>
++    /// Breath tool that gets spawned and connected to the entity's internals.
++    /// </summary>
++    [DataField]
++    public EntProtoId BreathTool = "HLInnateRebreather";
++
++    /// <summary>
++    /// Gas tank that gets spawned and made available to the entity's internals.
++    /// </summary>
++    [DataField]
++    public EntProtoId GasTank = "HLInnateAirReservoir";
++
++    /// <summary>
++    /// Container the spawned apparatus is kept in.
++    /// </summary>
++    [DataField]
++    public string ContainerId = "innate_internals";
++
++    [ViewVariables]
++    public EntityUid? BreathToolEntity;
++
++    [ViewVariables]
++    public EntityUid? GasTankEntity;
++}
+diff --git a/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs b/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs
+new file mode 100644
+index 000000000..161bfba98
+--- /dev/null
++++ b/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs
+@@ -0,0 +1,16 @@
++using Robust.Shared.GameStates;
++
++namespace Content.Shared._HL.Nutrition;
++
++/// <summary>
++/// Prevents the entity from eating or drinking anything, as if its mouth were permanently covered.
++/// </summary>
++[RegisterComponent, NetworkedComponent]
++public sealed partial class SealedMouthComponent : Component
++{
++    /// <summary>
++    /// Popup shown to the entity when it tries to ingest something.
++    /// </summary>
++    [DataField]
++    public LocId Popup = "sealed-mouth-cannot-ingest";
++}
+diff --git a/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl b/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl
+new file mode 100644
+index 000000000..ac87fdb3b
+--- /dev/null
++++ b/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl
+@@ -0,0 +1 @@
++sealed-mouth-cannot-ingest = Your mouth is sealed shut. You can't eat or drink.
+diff --git a/Resources/Locale/en-US/_HL/traits/traits.ftl b/Resources/Locale/en-US/_HL/traits/traits.ftl
+index 7269e99d8..85d42538e 100644
+--- a/Resources/Locale/en-US/_HL/traits/traits.ftl
++++ b/Resources/Locale/en-US/_HL/traits/traits.ftl
+@@ -19,6 +19,9 @@ snake-eater-text = Your body is resistant to poison damage, reducing it by 50%.
+ cryo-resistant-name = Cryo Resistant
+ cryo-resistant-text = Your body is highly resistant to cold damage.
+ 
++drone-name = Drone
++drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against half of all electrical shocks, and its tacky soles keep you upright on slippery floors. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. Your mouth is sealed shut in exchange, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
++
+ natural-regen-name = Natural Regeneration
+ natural-regen-text = Your body passively heals from minor injuries over time.
+ 
+diff --git a/Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml b/Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml
+new file mode 100644
+index 000000000..3c9c8209b
+--- /dev/null
++++ b/Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml
+@@ -0,0 +1,29 @@
++# Internal breathing apparatus used by the InnateInternals component. These live inside the
++# entity that owns them and are never meant to be spawned or handled on their own.
++- type: entity
++  id: HLInnateRebreather
++  name: integrated rebreather
++  description: A sealed intake valve grafted into an airway.
++  categories: [ HideSpawnMenu ]
++  components:
++  - type: BreathMask
++
++- type: entity
++  id: HLInnateAirReservoir
++  name: integrated air reservoir
++  description: A slim bladder of compressed air tucked under a layer of latex.
++  categories: [ HideSpawnMenu ]
++  components:
++  - type: UseDelay
++    delays:
++      gasTank:
++        length: 1.0
++  - type: GasTank
++    outputPressure: 21.3
++    tankLowPressure: 30.0
++    air:
++      # ~18 minutes
++      volume: 3
++      moles:
++        - 1.230827 # oxygen
++      temperature: 293.15
+diff --git a/Resources/Prototypes/_HL/Traits/Physical.yml b/Resources/Prototypes/_HL/Traits/Physical.yml
+index ed53f094e..9bcb7c3f5 100644
+--- a/Resources/Prototypes/_HL/Traits/Physical.yml
++++ b/Resources/Prototypes/_HL/Traits/Physical.yml
+@@ -127,6 +127,42 @@
+         coefficients:
+           Cold: 0.01
+ 
++- type: trait
++  id: Drone
++  name: drone-name
++  description: drone-text
++  category: Physical
++  cost: 6
++  speciesBlacklist:
++  - IPC
++  - Synth
++  blacklist:
++    components:
++    - BorgChassis
++  mutuallyExclusiveTraits:
++  - Insulated
++  - Heatresistant
++  replaceComponents: true
++  components:
++  - type: NoSlip
++  - type: InnateInternals
++  - type: SealedMouth
++  # The frame feeds and waters its occupant, so a sealed mouth isn't a slow death sentence.
++  - type: Hunger
++    baseDecayRate: 0
++  - type: Thirst
++    baseDecayRate: 0
++  - type: DamageProtectionBuff
++    modifiers:
++      dermal:
++        id: DroneTrait
++        coefficients:
++          Shock: 0.5
++          Blunt: 0.85
++          Slash: 0.85
++          Heat: 1.4
++          Caustic: 1.3
++
+ - type: trait
+   id: NaturalRegen
+   name: natural-regen-name
