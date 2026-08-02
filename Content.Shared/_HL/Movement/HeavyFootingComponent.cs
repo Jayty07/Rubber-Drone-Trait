@@ -22,6 +22,12 @@ public sealed partial class HeavyFootingComponent : Component
     public float StepDistance = 1.5f;
 
     /// <summary>
+    /// Movement further than this in a single step is a teleport rather than walking, and is ignored.
+    /// </summary>
+    [DataField]
+    public float MaxStepDistance = 1f;
+
+    /// <summary>
     /// How long the entity stays down for after a stumble.
     /// </summary>
     [DataField]
@@ -37,8 +43,20 @@ public sealed partial class HeavyFootingComponent : Component
     public LocId Popup = "heavy-footing-stumble";
 
     /// <summary>
+    /// How long after a stumble the entity is safe from stumbling again.
+    /// </summary>
+    [DataField]
+    public TimeSpan GracePeriod = TimeSpan.FromSeconds(45);
+
+    /// <summary>
     /// Distance moved since the last step.
     /// </summary>
     [ViewVariables]
     public float Accumulator;
+
+    /// <summary>
+    /// Time the grace period from the last stumble runs out.
+    /// </summary>
+    [ViewVariables]
+    public TimeSpan GraceEndTime;
 }

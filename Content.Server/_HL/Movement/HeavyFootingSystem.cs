@@ -5,6 +5,7 @@ using Content.Shared.Standing;
 using Content.Shared.Stunnable;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Random;
+using Robust.Shared.Timing;
 
 namespace Content.Server._HL.Movement;
 
@@ -13,6 +14,7 @@ namespace Content.Server._HL.Movement;
 /// </summary>
 public sealed class HeavyFootingSystem : EntitySystem
 {
+    [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly SharedGravitySystem _gravity = default!;
@@ -30,12 +32,16 @@ public sealed class HeavyFootingSystem : EntitySystem
     private void OnMove(Entity<HeavyFootingComponent> ent, ref MoveEvent args)
     {
         if (args.ParentChanged
+            || _timing.CurTime < ent.Comp.GraceEndTime
             || _standing.IsDown(ent)
             || _gravity.IsWeightless(ent)
             || !args.NewPosition.TryDistance(EntityManager, args.OldPosition, out var distance))
         {
             return;
         }
+
+        if (distance > ent.Comp.MaxStepDistance)
+            return;
 
         ent.Comp.Accumulator += distance;
 
@@ -49,6 +55,8 @@ public sealed class HeavyFootingSystem : EntitySystem
 
         if (!_stun.TryKnockdown(ent, ent.Comp.KnockdownTime, refresh: true))
             return;
+
+        ent.Comp.GraceEndTime = _timing.CurTime + ent.Comp.GracePeriod;
 
         _audio.PlayPvs(ent.Comp.StumbleSound, ent);
         _popup.PopupEntity(Loc.GetString(ent.Comp.Popup), ent, ent);

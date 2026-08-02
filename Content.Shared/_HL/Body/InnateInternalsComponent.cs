@@ -8,7 +8,7 @@ namespace Content.Shared._HL.Body;
 /// inside the entity and wired into its internals, so it can run internals without a mask or a
 /// carried tank.
 /// </summary>
-[RegisterComponent, NetworkedComponent]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class InnateInternalsComponent : Component
 {
     /// <summary>
@@ -29,9 +29,9 @@ public sealed partial class InnateInternalsComponent : Component
     [DataField]
     public string ContainerId = "innate_internals";
 
-    [ViewVariables]
+    [ViewVariables, AutoNetworkedField]
     public EntityUid? BreathToolEntity;
 
-    [ViewVariables]
+    [ViewVariables, AutoNetworkedField]
     public EntityUid? GasTankEntity;
 }

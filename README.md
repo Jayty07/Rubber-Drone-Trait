@@ -28,8 +28,8 @@ Upsides:
 Downsides:
 
 * 10% slower at a walk, 15% slower at a sprint; the rubber is heavy.
-* 2% chance per step to lose your footing and fall over, and standing back up takes 4 seconds
-  instead of 1.
+* 2% chance per step to lose your footing and fall over (with a 45 second grace period after each
+  fall), and standing back up takes 4 seconds instead of 1.
 * Heat damage +40%, Caustic damage +30%; latex melts and dissolves.
 * Your mouth is sealed: you can never eat or drink anything, including chemicals and medicine.
 
@@ -43,7 +43,8 @@ Downsides:
 * `Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs`, `Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs` —
   a flat walk/sprint multiplier applied through `RefreshMovementSpeedModifiersEvent`.
 * `Content.Shared/_HL/Movement/HeavyFootingComponent.cs`, `Content.Server/_HL/Movement/HeavyFootingSystem.cs` —
-  accumulates distance from `MoveEvent` and rolls a knockdown once per step travelled.
+  accumulates distance from `MoveEvent` and rolls a knockdown once per step travelled, ignoring
+  teleport-sized jumps and respecting a post-fall grace period.
 * `Resources/Locale/en-US/_HL/movement/heavy-footing.ftl` — the stumble popup.
 * `Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml` — the two internal entities.
 * `Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl` — the ingestion popup.
@@ -107,11 +108,33 @@ drone-name = Drone
 drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, occasionally dragging you off balance mid-step and taking four seconds of struggling to get back up, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 ```
 
+`Content.Shared/Body/Systems/SharedInternalsSystem.cs` — `FindBestGasTank` only searches back,
+suit storage, hands and pockets, so clicking the internals *alert* failed with "You are not wearing a
+gas tank" even though the granted action worked. It now checks `InnateInternalsComponent` first:
+
+```csharp
+if (TryComp<InnateInternalsComponent>(user, out var innate) &&
+    TryComp<GasTankComponent>(innate.GasTankEntity, out var innateGasTank) &&
+    _gasTank.CanConnectToInternals((innate.GasTankEntity.Value, innateGasTank)))
+{
+    return (innate.GasTankEntity.Value, innateGasTank);
+}
+```
+
+## Running it
+
+A full HardLight checkout with this trait applied lives on the [`hardlight-drone`](https://github.com/Jayty07/Rubber-Drone-Trait/tree/hardlight-drone)
+branch; see [RUNNING.md](RUNNING.md) for build and run instructions.
+
 ## Verification
 
 Applied on top of [fenndragon/HardLight](https://github.com/fenndragon/HardLight) at `5d54fc52b6`
 (that fork needs the .NET 10 SDK): `dotnet build Content.Server` reports 0 errors and
-`Content.YAMLLinter` reports "No errors found". Not yet tested in a running round.
+`Content.YAMLLinter` reports "No errors found".
+
+Tested in a live round: the trait appears in character setup with the right cost and description,
+internals run with no mask or tank, eating and drinking are blocked, and the stumble fires while
+moving. The stand-up timer and the speed modifiers were not visually confirmed.
 
 `patches/drone-trait.patch` is a `git format-patch` output against that commit — apply it in a
 HardLight checkout with `git am patches/drone-trait.patch`.

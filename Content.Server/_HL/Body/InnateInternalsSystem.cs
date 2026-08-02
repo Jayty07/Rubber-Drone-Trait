@@ -37,6 +37,7 @@ public sealed class InnateInternalsSystem : EntitySystem
 
         ent.Comp.BreathToolEntity = tool;
         ent.Comp.GasTankEntity = tank;
+        Dirty(ent);
 
         _internals.ConnectBreathTool((ent, internals), tool);
 
@@ -58,5 +59,6 @@ public sealed class InnateInternalsSystem : EntitySystem
 
         ent.Comp.BreathToolEntity = null;
         ent.Comp.GasTankEntity = null;
+        Dirty(ent);
     }
 }
