@@ -11,8 +11,7 @@ checkout root. `patches/drone-trait.patch` additionally contains the edits to th
 | | |
 | --- | --- |
 | ID | `Drone` |
-| Category | `Physical` |
-| Cost | 6 |
+| Category | `Lewd` |
 | Excludes | `Insulated`, `Heatresistant` |
 | Blocked for | `IPC`, `Synth`, `Vox`, `Slime`, anything with `BorgChassis` |
 
