@@ -105,7 +105,7 @@ without it the trait system skips components the entity already has.
 
 ```ftl
 drone-name = Drone
-drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst.
+drone-text = Your body is sealed in a layer of heavy, but seamless drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst.
 ```
 
 `Content.Shared/Body/Systems/SharedInternalsSystem.cs` : `FindBestGasTank` only searches back,
