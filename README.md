@@ -18,12 +18,12 @@ checkout root. `patches/drone-trait.patch` additionally contains the edits to th
 
 Upsides:
 
-* `Insulated` — the latex is a natural insulator, so electrical shocks do nothing.
+* `Insulated` : the latex is a natural insulator, so electrical shocks do nothing.
 * Blunt and Slash reduced by 15%.
 * Built-in internals: an `integrated rebreather` and an `integrated air reservoir` (3 L, ~18 minutes)
   spawn inside you and are wired into your `Internals`, so internals work with no mask and no carried
   tank. The reservoir's toggle action is granted directly since it never sits in an inventory slot.
-* Hunger and thirst never decay — the frame sustains its occupant.
+* Hunger and thirst never decay : the frame sustains its occupant.
 
 Downsides:
 
@@ -35,19 +35,19 @@ Downsides:
 
 ## New files
 
-* `Content.Shared/_HL/Body/InnateInternalsComponent.cs`, `Content.Server/_HL/Body/InnateInternalsSystem.cs` —
+* `Content.Shared/_HL/Body/InnateInternalsComponent.cs`, `Content.Server/_HL/Body/InnateInternalsSystem.cs` :
   spawns the breath tool and gas tank into an `innate_internals` container on the entity, connects the
   breath tool to `InternalsComponent`, and hands out the tank's internals toggle action.
-* `Content.Shared/_HL/Nutrition/SealedMouthComponent.cs`, `Content.Server/_HL/Nutrition/SealedMouthSystem.cs` —
+* `Content.Shared/_HL/Nutrition/SealedMouthComponent.cs`, `Content.Server/_HL/Nutrition/SealedMouthSystem.cs` :
   cancels `IngestionAttemptEvent` and popups the reason.
-* `Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs`, `Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs` —
+* `Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs`, `Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs` :
   a flat walk/sprint multiplier applied through `RefreshMovementSpeedModifiersEvent`.
-* `Content.Shared/_HL/Movement/HeavyFootingComponent.cs`, `Content.Server/_HL/Movement/HeavyFootingSystem.cs` —
+* `Content.Shared/_HL/Movement/HeavyFootingComponent.cs`, `Content.Server/_HL/Movement/HeavyFootingSystem.cs` :
   accumulates distance from `MoveEvent` and rolls a knockdown once per step travelled, ignoring
   teleport-sized jumps and respecting a post-fall grace period.
-* `Resources/Locale/en-US/_HL/movement/heavy-footing.ftl` — the stumble popup.
-* `Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml` — the two internal entities.
-* `Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl` — the ingestion popup.
+* `Resources/Locale/en-US/_HL/movement/heavy-footing.ftl` : the stumble popup.
+* `Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml` : the two internal entities.
+* `Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl` : the ingestion popup.
 
 ## Edits to existing files
 
@@ -108,7 +108,7 @@ drone-name = Drone
 drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, occasionally dragging you off balance mid-step and taking four seconds of struggling to get back up, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 ```
 
-`Content.Shared/Body/Systems/SharedInternalsSystem.cs` — `FindBestGasTank` only searches back,
+`Content.Shared/Body/Systems/SharedInternalsSystem.cs` : `FindBestGasTank` only searches back,
 suit storage, hands and pockets, so clicking the internals *alert* failed with "You are not wearing a
 gas tank" even though the granted action worked. It now checks `InnateInternalsComponent` first:
 
@@ -136,5 +136,5 @@ Tested in a live round: the trait appears in character setup with the right cost
 internals run with no mask or tank, eating and drinking are blocked, and the stumble fires while
 moving. The stand-up timer and the speed modifiers were not visually confirmed.
 
-`patches/drone-trait.patch` is a `git format-patch` output against that commit — apply it in a
+`patches/drone-trait.patch` is a `git format-patch` output against that commit : apply it in a
 HardLight checkout with `git am patches/drone-trait.patch`.
