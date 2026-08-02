@@ -51,15 +51,14 @@ Downsides:
 
 ## Edits to existing files
 
-`Resources/Prototypes/_HL/Traits/Physical.yml`:
+`Resources/Prototypes/_HL/Traits/lewd.yml`:
 
 ```yaml
 - type: trait
   id: Drone
   name: drone-name
   description: drone-text
-  category: Physical
-  cost: 6
+  category: Lewd
   speciesBlacklist:
   - IPC
   - Synth
