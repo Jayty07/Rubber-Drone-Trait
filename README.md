@@ -12,13 +12,14 @@ checkout root. `patches/drone-trait.patch` additionally contains the edits to th
 | --- | --- |
 | ID | `Drone` |
 | Category | `Physical` |
-| Cost | 5 |
+| Cost | 8 |
 | Excludes | `Insulated`, `Heatresistant` |
 | Blocked for | `IPC`, `Synth`, anything with `BorgChassis` |
 
 Upsides:
 
-* Shock damage halved, Blunt and Slash reduced by 15%.
+* `Insulated` — the latex is a natural insulator, so electrical shocks do nothing.
+* Blunt and Slash reduced by 15%.
 * Built-in internals: an `integrated rebreather` and an `integrated air reservoir` (3 L, ~18 minutes)
   spawn inside you and are wired into your `Internals`, so internals work with no mask and no carried
   tank. The reservoir's toggle action is granted directly since it never sits in an inventory slot.
@@ -52,7 +53,7 @@ Downsides:
   name: drone-name
   description: drone-text
   category: Physical
-  cost: 5
+  cost: 8
   speciesBlacklist:
   - IPC
   - Synth
@@ -64,6 +65,7 @@ Downsides:
   - Heatresistant
   replaceComponents: true
   components:
+  - type: Insulated
   - type: InnateInternals
   - type: SealedMouth
   - type: StaticSpeedModifier
@@ -79,7 +81,6 @@ Downsides:
       dermal:
         id: DroneTrait
         coefficients:
-          Shock: 0.5
           Blunt: 0.85
           Slash: 0.85
           Heat: 1.4
@@ -93,7 +94,7 @@ without it the trait system skips components the entity already has.
 
 ```ftl
 drone-name = Drone
-drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against half of all electrical shocks. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
+drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 ```
 
 ## Verification

@@ -231,7 +231,7 @@ index 000000000..ac87fdb3b
 @@ -0,0 +1 @@
 +sealed-mouth-cannot-ingest = Your mouth is sealed shut. You can't eat or drink.
 diff --git a/Resources/Locale/en-US/_HL/traits/traits.ftl b/Resources/Locale/en-US/_HL/traits/traits.ftl
-index 7269e99d8..19f333e27 100644
+index 7269e99d8..4999df7e6 100644
 --- a/Resources/Locale/en-US/_HL/traits/traits.ftl
 +++ b/Resources/Locale/en-US/_HL/traits/traits.ftl
 @@ -19,6 +19,9 @@ snake-eater-text = Your body is resistant to poison damage, reducing it by 50%.
@@ -239,7 +239,7 @@ index 7269e99d8..19f333e27 100644
  cryo-resistant-text = Your body is highly resistant to cold damage.
  
 +drone-name = Drone
-+drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against half of all electrical shocks. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
++drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 +
  natural-regen-name = Natural Regeneration
  natural-regen-text = Your body passively heals from minor injuries over time.
@@ -280,7 +280,7 @@ index 000000000..3c9c8209b
 +        - 1.230827 # oxygen
 +      temperature: 293.15
 diff --git a/Resources/Prototypes/_HL/Traits/Physical.yml b/Resources/Prototypes/_HL/Traits/Physical.yml
-index ed53f094e..7f89e0e80 100644
+index ed53f094e..0b2bac771 100644
 --- a/Resources/Prototypes/_HL/Traits/Physical.yml
 +++ b/Resources/Prototypes/_HL/Traits/Physical.yml
 @@ -127,6 +127,44 @@
@@ -292,7 +292,7 @@ index ed53f094e..7f89e0e80 100644
 +  name: drone-name
 +  description: drone-text
 +  category: Physical
-+  cost: 5
++  cost: 8
 +  speciesBlacklist:
 +  - IPC
 +  - Synth
@@ -304,6 +304,7 @@ index ed53f094e..7f89e0e80 100644
 +  - Heatresistant
 +  replaceComponents: true
 +  components:
++  - type: Insulated
 +  - type: InnateInternals
 +  - type: SealedMouth
 +  - type: StaticSpeedModifier
@@ -319,7 +320,6 @@ index ed53f094e..7f89e0e80 100644
 +      dermal:
 +        id: DroneTrait
 +        coefficients:
-+          Shock: 0.5
 +          Blunt: 0.85
 +          Slash: 0.85
 +          Heat: 1.4
