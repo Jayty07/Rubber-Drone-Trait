@@ -93,7 +93,6 @@ Downsides:
         id: DroneTrait
         coefficients:
           Blunt: 0.85
-          Slash: 0.85
           Heat: 1.4
           Caustic: 1.3
 ```
