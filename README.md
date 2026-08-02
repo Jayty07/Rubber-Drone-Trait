@@ -109,6 +109,9 @@ drone-text = Your body is sealed in a seamless layer of drone-grade latex. The r
 
 ## Verification
 
-Authored against the SandwichStation-HL mirror of HardLight (HardLightSector/HardLight itself was not
-reachable). `dotnet build Content.Server` reports 0 errors and `Content.YAMLLinter` reports
-"No errors found". Not yet tested in a running round.
+Applied on top of [fenndragon/HardLight](https://github.com/fenndragon/HardLight) at `5d54fc52b6`
+(that fork needs the .NET 10 SDK): `dotnet build Content.Server` reports 0 errors and
+`Content.YAMLLinter` reports "No errors found". Not yet tested in a running round.
+
+`patches/drone-trait.patch` is a `git format-patch` output against that commit — apply it in a
+HardLight checkout with `git am patches/drone-trait.patch`.

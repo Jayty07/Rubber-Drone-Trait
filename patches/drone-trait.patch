@@ -1,6 +1,38 @@
+From 7e9e72b6fa52a2422a812e710d1be7e9528c166e Mon Sep 17 00:00:00 2001
+From: Jayce <jaycejak2000@gmail.com>
+Date: Sun, 2 Aug 2026 16:56:18 +0000
+Subject: [PATCH] Add Drone physical trait
+
+---
+ .../_HL/Body/InnateInternalsSystem.cs         | 62 +++++++++++++++++++
+ .../_HL/Movement/HeavyFootingSystem.cs        | 56 +++++++++++++++++
+ .../_HL/Nutrition/SealedMouthSystem.cs        | 26 ++++++++
+ .../_HL/Body/InnateInternalsComponent.cs      | 37 +++++++++++
+ .../_HL/Movement/HeavyFootingComponent.cs     | 44 +++++++++++++
+ .../Movement/StaticSpeedModifierComponent.cs  | 16 +++++
+ .../_HL/Movement/StaticSpeedModifierSystem.cs | 32 ++++++++++
+ .../_HL/Nutrition/SealedMouthComponent.cs     | 16 +++++
+ .../en-US/_HL/movement/heavy-footing.ftl      |  1 +
+ .../en-US/_HL/nutrition/sealed-mouth.ftl      |  1 +
+ Resources/Locale/en-US/_HL/traits/traits.ftl  |  3 +
+ .../Objects/Misc/innate_internals.yml         | 29 +++++++++
+ Resources/Prototypes/_HL/Traits/Physical.yml  | 43 +++++++++++++
+ 13 files changed, 366 insertions(+)
+ create mode 100644 Content.Server/_HL/Body/InnateInternalsSystem.cs
+ create mode 100644 Content.Server/_HL/Movement/HeavyFootingSystem.cs
+ create mode 100644 Content.Server/_HL/Nutrition/SealedMouthSystem.cs
+ create mode 100644 Content.Shared/_HL/Body/InnateInternalsComponent.cs
+ create mode 100644 Content.Shared/_HL/Movement/HeavyFootingComponent.cs
+ create mode 100644 Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs
+ create mode 100644 Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs
+ create mode 100644 Content.Shared/_HL/Nutrition/SealedMouthComponent.cs
+ create mode 100644 Resources/Locale/en-US/_HL/movement/heavy-footing.ftl
+ create mode 100644 Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl
+ create mode 100644 Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml
+
 diff --git a/Content.Server/_HL/Body/InnateInternalsSystem.cs b/Content.Server/_HL/Body/InnateInternalsSystem.cs
 new file mode 100644
-index 000000000..4d807c8c6
+index 0000000000..4d807c8c6d
 --- /dev/null
 +++ b/Content.Server/_HL/Body/InnateInternalsSystem.cs
 @@ -0,0 +1,62 @@
@@ -68,7 +100,7 @@ index 000000000..4d807c8c6
 +}
 diff --git a/Content.Server/_HL/Movement/HeavyFootingSystem.cs b/Content.Server/_HL/Movement/HeavyFootingSystem.cs
 new file mode 100644
-index 000000000..ad7d5131b
+index 0000000000..ad7d5131b1
 --- /dev/null
 +++ b/Content.Server/_HL/Movement/HeavyFootingSystem.cs
 @@ -0,0 +1,56 @@
@@ -130,7 +162,7 @@ index 000000000..ad7d5131b
 +}
 diff --git a/Content.Server/_HL/Nutrition/SealedMouthSystem.cs b/Content.Server/_HL/Nutrition/SealedMouthSystem.cs
 new file mode 100644
-index 000000000..8e1f7589c
+index 0000000000..8e1f7589c1
 --- /dev/null
 +++ b/Content.Server/_HL/Nutrition/SealedMouthSystem.cs
 @@ -0,0 +1,26 @@
@@ -162,7 +194,7 @@ index 000000000..8e1f7589c
 +}
 diff --git a/Content.Shared/_HL/Body/InnateInternalsComponent.cs b/Content.Shared/_HL/Body/InnateInternalsComponent.cs
 new file mode 100644
-index 000000000..ba821231e
+index 0000000000..ba821231ef
 --- /dev/null
 +++ b/Content.Shared/_HL/Body/InnateInternalsComponent.cs
 @@ -0,0 +1,37 @@
@@ -205,7 +237,7 @@ index 000000000..ba821231e
 +}
 diff --git a/Content.Shared/_HL/Movement/HeavyFootingComponent.cs b/Content.Shared/_HL/Movement/HeavyFootingComponent.cs
 new file mode 100644
-index 000000000..7e4442312
+index 0000000000..7e44423126
 --- /dev/null
 +++ b/Content.Shared/_HL/Movement/HeavyFootingComponent.cs
 @@ -0,0 +1,44 @@
@@ -255,7 +287,7 @@ index 000000000..7e4442312
 +}
 diff --git a/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs b/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs
 new file mode 100644
-index 000000000..caff623a7
+index 0000000000..caff623a76
 --- /dev/null
 +++ b/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs
 @@ -0,0 +1,16 @@
@@ -277,7 +309,7 @@ index 000000000..caff623a7
 +}
 diff --git a/Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs b/Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs
 new file mode 100644
-index 000000000..10e4125b5
+index 0000000000..10e4125b51
 --- /dev/null
 +++ b/Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs
 @@ -0,0 +1,32 @@
@@ -315,7 +347,7 @@ index 000000000..10e4125b5
 +}
 diff --git a/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs b/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs
 new file mode 100644
-index 000000000..161bfba98
+index 0000000000..161bfba98a
 --- /dev/null
 +++ b/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs
 @@ -0,0 +1,16 @@
@@ -337,35 +369,32 @@ index 000000000..161bfba98
 +}
 diff --git a/Resources/Locale/en-US/_HL/movement/heavy-footing.ftl b/Resources/Locale/en-US/_HL/movement/heavy-footing.ftl
 new file mode 100644
-index 000000000..f7288de17
+index 0000000000..f7288de171
 --- /dev/null
 +++ b/Resources/Locale/en-US/_HL/movement/heavy-footing.ftl
 @@ -0,0 +1 @@
 +heavy-footing-stumble = The weight of the rubber drags you off balance!
 diff --git a/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl b/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl
 new file mode 100644
-index 000000000..ac87fdb3b
+index 0000000000..ac87fdb3be
 --- /dev/null
 +++ b/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl
 @@ -0,0 +1 @@
 +sealed-mouth-cannot-ingest = Your mouth is sealed shut. You can't eat or drink.
 diff --git a/Resources/Locale/en-US/_HL/traits/traits.ftl b/Resources/Locale/en-US/_HL/traits/traits.ftl
-index 7269e99d8..269921785 100644
+index e68df2ee4b..fed1b7a8e7 100644
 --- a/Resources/Locale/en-US/_HL/traits/traits.ftl
 +++ b/Resources/Locale/en-US/_HL/traits/traits.ftl
-@@ -19,6 +19,9 @@ snake-eater-text = Your body is resistant to poison damage, reducing it by 50%.
- cryo-resistant-name = Cryo Resistant
- cryo-resistant-text = Your body is highly resistant to cold damage.
+@@ -157,3 +157,6 @@ trait-highest-voice-desc = Your emotes sound much higher than usual.
  
+ trait-test-bionic-spinarette-name = Test Bionic Spinarette
+ trait-test-bionic-spinarette-desc = Speeeeeeen
++
 +drone-name = Drone
 +drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, occasionally dragging you off balance mid-step and taking four seconds of struggling to get back up, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
-+
- natural-regen-name = Natural Regeneration
- natural-regen-text = Your body passively heals from minor injuries over time.
- 
 diff --git a/Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml b/Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml
 new file mode 100644
-index 000000000..3c9c8209b
+index 0000000000..3c9c8209b1
 --- /dev/null
 +++ b/Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml
 @@ -0,0 +1,29 @@
@@ -399,13 +428,14 @@ index 000000000..3c9c8209b
 +        - 1.230827 # oxygen
 +      temperature: 293.15
 diff --git a/Resources/Prototypes/_HL/Traits/Physical.yml b/Resources/Prototypes/_HL/Traits/Physical.yml
-index ed53f094e..54d00ae63 100644
+index f5d0321dbf..30cd1f1c28 100644
 --- a/Resources/Prototypes/_HL/Traits/Physical.yml
 +++ b/Resources/Prototypes/_HL/Traits/Physical.yml
-@@ -127,6 +127,49 @@
-         coefficients:
-           Cold: 0.01
- 
+@@ -493,3 +493,46 @@
+     ignoreSymmetry: true
+   - type: BuckleOnMapInit
+     prototype: VehicleWheelchair
++
 +- type: trait
 +  id: Drone
 +  name: drone-name
@@ -448,7 +478,6 @@ index ed53f094e..54d00ae63 100644
 +          Slash: 0.85
 +          Heat: 1.4
 +          Caustic: 1.3
-+
- - type: trait
-   id: NaturalRegen
-   name: natural-regen-name
+-- 
+2.34.1
+
