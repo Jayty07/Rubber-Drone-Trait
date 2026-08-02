@@ -14,7 +14,7 @@ checkout root. `patches/drone-trait.patch` additionally contains the edits to th
 | Category | `Physical` |
 | Cost | 6 |
 | Excludes | `Insulated`, `Heatresistant` |
-| Blocked for | `IPC`, `Synth`, anything with `BorgChassis` |
+| Blocked for | `IPC`, `Synth`, `Vox`, `Slime`, anything with `BorgChassis` |
 
 Upsides:
 
@@ -63,25 +63,28 @@ Downsides:
   speciesBlacklist:
   - IPC
   - Synth
+  - Vox
+  - Slime
   blacklist:
     components:
     - BorgChassis
   mutuallyExclusiveTraits:
   - Insulated
   - Heatresistant
+  - Vampirism
   replaceComponents: true
   components:
   - type: Insulated
   - type: InnateInternals
   - type: SealedMouth
   - type: StaticSpeedModifier
-    walkModifier: 0.9
-    sprintModifier: 0.85
+    walkModifier: 0.8
+    sprintModifier: 0.75
   - type: HeavyFooting
     stumbleChance: 0.02
   # Hauling yourself upright in a rubber suit takes a while.
   - type: LayingDown
-    standingUpTime: 4
+    standingUpTime: 5
   # The frame feeds and waters its occupant, so a sealed mouth isn't a slow death sentence.
   - type: Hunger
     baseDecayRate: 0
@@ -93,6 +96,7 @@ Downsides:
         id: DroneTrait
         coefficients:
           Blunt: 0.85
+          Slash: 0.85
           Heat: 1.4
           Caustic: 1.3
 ```
