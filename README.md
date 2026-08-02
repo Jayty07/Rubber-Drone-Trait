@@ -124,7 +124,7 @@ if (TryComp<InnateInternalsComponent>(user, out var innate) &&
 ## Running it
 
 A full HardLight checkout with this trait applied lives on the [`hardlight-drone`](https://github.com/Jayty07/Rubber-Drone-Trait/tree/hardlight-drone)
-branch; see [RUNNING.md](RUNNING.md) for build and run instructions.
+branch.
 
 ## Verification
 
