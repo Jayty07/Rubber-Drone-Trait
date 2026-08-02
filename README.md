@@ -12,7 +12,7 @@ checkout root. `patches/drone-trait.patch` additionally contains the edits to th
 | --- | --- |
 | ID | `Drone` |
 | Category | `Physical` |
-| Cost | 8 |
+| Cost | 6 |
 | Excludes | `Insulated`, `Heatresistant` |
 | Blocked for | `IPC`, `Synth`, anything with `BorgChassis` |
 
@@ -28,6 +28,8 @@ Upsides:
 Downsides:
 
 * 10% slower at a walk, 15% slower at a sprint; the rubber is heavy.
+* 2% chance per step to lose your footing and fall over, and standing back up takes 4 seconds
+  instead of 1.
 * Heat damage +40%, Caustic damage +30%; latex melts and dissolves.
 * Your mouth is sealed: you can never eat or drink anything, including chemicals and medicine.
 
@@ -40,6 +42,9 @@ Downsides:
   cancels `IngestionAttemptEvent` and popups the reason.
 * `Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs`, `Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs` —
   a flat walk/sprint multiplier applied through `RefreshMovementSpeedModifiersEvent`.
+* `Content.Shared/_HL/Movement/HeavyFootingComponent.cs`, `Content.Server/_HL/Movement/HeavyFootingSystem.cs` —
+  accumulates distance from `MoveEvent` and rolls a knockdown once per step travelled.
+* `Resources/Locale/en-US/_HL/movement/heavy-footing.ftl` — the stumble popup.
 * `Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml` — the two internal entities.
 * `Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl` — the ingestion popup.
 
@@ -53,7 +58,7 @@ Downsides:
   name: drone-name
   description: drone-text
   category: Physical
-  cost: 8
+  cost: 6
   speciesBlacklist:
   - IPC
   - Synth
@@ -71,6 +76,11 @@ Downsides:
   - type: StaticSpeedModifier
     walkModifier: 0.9
     sprintModifier: 0.85
+  - type: HeavyFooting
+    stumbleChance: 0.02
+  # Hauling yourself upright in a rubber suit takes a while.
+  - type: LayingDown
+    standingUpTime: 4
   # The frame feeds and waters its occupant, so a sealed mouth isn't a slow death sentence.
   - type: Hunger
     baseDecayRate: 0
@@ -94,7 +104,7 @@ without it the trait system skips components the entity already has.
 
 ```ftl
 drone-name = Drone
-drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
+drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, occasionally dragging you off balance mid-step and taking four seconds of struggling to get back up, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 ```
 
 ## Verification

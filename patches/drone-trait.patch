@@ -66,6 +66,68 @@ index 000000000..4d807c8c6
 +        ent.Comp.GasTankEntity = null;
 +    }
 +}
+diff --git a/Content.Server/_HL/Movement/HeavyFootingSystem.cs b/Content.Server/_HL/Movement/HeavyFootingSystem.cs
+new file mode 100644
+index 000000000..ad7d5131b
+--- /dev/null
++++ b/Content.Server/_HL/Movement/HeavyFootingSystem.cs
+@@ -0,0 +1,56 @@
++using Content.Shared._HL.Movement;
++using Content.Shared.Gravity;
++using Content.Shared.Popups;
++using Content.Shared.Standing;
++using Content.Shared.Stunnable;
++using Robust.Shared.Audio.Systems;
++using Robust.Shared.Random;
++
++namespace Content.Server._HL.Movement;
++
++/// <summary>
++/// Rolls for a stumble every step an entity with <see cref="HeavyFootingComponent"/> takes.
++/// </summary>
++public sealed class HeavyFootingSystem : EntitySystem
++{
++    [Dependency] private readonly IRobustRandom _random = default!;
++    [Dependency] private readonly SharedAudioSystem _audio = default!;
++    [Dependency] private readonly SharedGravitySystem _gravity = default!;
++    [Dependency] private readonly SharedPopupSystem _popup = default!;
++    [Dependency] private readonly SharedStunSystem _stun = default!;
++    [Dependency] private readonly StandingStateSystem _standing = default!;
++
++    public override void Initialize()
++    {
++        base.Initialize();
++
++        SubscribeLocalEvent<HeavyFootingComponent, MoveEvent>(OnMove);
++    }
++
++    private void OnMove(Entity<HeavyFootingComponent> ent, ref MoveEvent args)
++    {
++        if (args.ParentChanged
++            || _standing.IsDown(ent)
++            || _gravity.IsWeightless(ent)
++            || !args.NewPosition.TryDistance(EntityManager, args.OldPosition, out var distance))
++        {
++            return;
++        }
++
++        ent.Comp.Accumulator += distance;
++
++        if (ent.Comp.Accumulator < ent.Comp.StepDistance)
++            return;
++
++        ent.Comp.Accumulator = 0f;
++
++        if (!_random.Prob(ent.Comp.StumbleChance))
++            return;
++
++        if (!_stun.TryKnockdown(ent, ent.Comp.KnockdownTime, refresh: true))
++            return;
++
++        _audio.PlayPvs(ent.Comp.StumbleSound, ent);
++        _popup.PopupEntity(Loc.GetString(ent.Comp.Popup), ent, ent);
++    }
++}
 diff --git a/Content.Server/_HL/Nutrition/SealedMouthSystem.cs b/Content.Server/_HL/Nutrition/SealedMouthSystem.cs
 new file mode 100644
 index 000000000..8e1f7589c
@@ -140,6 +202,56 @@ index 000000000..ba821231e
 +
 +    [ViewVariables]
 +    public EntityUid? GasTankEntity;
++}
+diff --git a/Content.Shared/_HL/Movement/HeavyFootingComponent.cs b/Content.Shared/_HL/Movement/HeavyFootingComponent.cs
+new file mode 100644
+index 000000000..7e4442312
+--- /dev/null
++++ b/Content.Shared/_HL/Movement/HeavyFootingComponent.cs
+@@ -0,0 +1,44 @@
++using Robust.Shared.Audio;
++using Robust.Shared.GameStates;
++
++namespace Content.Shared._HL.Movement;
++
++/// <summary>
++/// Every so many tiles walked there is a chance the entity loses its footing and falls over.
++/// </summary>
++[RegisterComponent, NetworkedComponent]
++public sealed partial class HeavyFootingComponent : Component
++{
++    /// <summary>
++    /// Chance to fall over per step taken.
++    /// </summary>
++    [DataField]
++    public float StumbleChance = 0.02f;
++
++    /// <summary>
++    /// How far the entity has to move for a step to count.
++    /// </summary>
++    [DataField]
++    public float StepDistance = 1.5f;
++
++    /// <summary>
++    /// How long the entity stays down for after a stumble.
++    /// </summary>
++    [DataField]
++    public TimeSpan KnockdownTime = TimeSpan.FromSeconds(2);
++
++    [DataField]
++    public SoundSpecifier StumbleSound = new SoundPathSpecifier("/Audio/Effects/slip.ogg");
++
++    /// <summary>
++    /// Popup shown to the entity when it stumbles.
++    /// </summary>
++    [DataField]
++    public LocId Popup = "heavy-footing-stumble";
++
++    /// <summary>
++    /// Distance moved since the last step.
++    /// </summary>
++    [ViewVariables]
++    public float Accumulator;
 +}
 diff --git a/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs b/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs
 new file mode 100644
@@ -223,6 +335,13 @@ index 000000000..161bfba98
 +    [DataField]
 +    public LocId Popup = "sealed-mouth-cannot-ingest";
 +}
+diff --git a/Resources/Locale/en-US/_HL/movement/heavy-footing.ftl b/Resources/Locale/en-US/_HL/movement/heavy-footing.ftl
+new file mode 100644
+index 000000000..f7288de17
+--- /dev/null
++++ b/Resources/Locale/en-US/_HL/movement/heavy-footing.ftl
+@@ -0,0 +1 @@
++heavy-footing-stumble = The weight of the rubber drags you off balance!
 diff --git a/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl b/Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl
 new file mode 100644
 index 000000000..ac87fdb3b
@@ -231,7 +350,7 @@ index 000000000..ac87fdb3b
 @@ -0,0 +1 @@
 +sealed-mouth-cannot-ingest = Your mouth is sealed shut. You can't eat or drink.
 diff --git a/Resources/Locale/en-US/_HL/traits/traits.ftl b/Resources/Locale/en-US/_HL/traits/traits.ftl
-index 7269e99d8..4999df7e6 100644
+index 7269e99d8..269921785 100644
 --- a/Resources/Locale/en-US/_HL/traits/traits.ftl
 +++ b/Resources/Locale/en-US/_HL/traits/traits.ftl
 @@ -19,6 +19,9 @@ snake-eater-text = Your body is resistant to poison damage, reducing it by 50%.
@@ -239,7 +358,7 @@ index 7269e99d8..4999df7e6 100644
  cryo-resistant-text = Your body is highly resistant to cold damage.
  
 +drone-name = Drone
-+drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
++drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against electrical shocks entirely. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, occasionally dragging you off balance mid-step and taking four seconds of struggling to get back up, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 +
  natural-regen-name = Natural Regeneration
  natural-regen-text = Your body passively heals from minor injuries over time.
@@ -280,10 +399,10 @@ index 000000000..3c9c8209b
 +        - 1.230827 # oxygen
 +      temperature: 293.15
 diff --git a/Resources/Prototypes/_HL/Traits/Physical.yml b/Resources/Prototypes/_HL/Traits/Physical.yml
-index ed53f094e..0b2bac771 100644
+index ed53f094e..54d00ae63 100644
 --- a/Resources/Prototypes/_HL/Traits/Physical.yml
 +++ b/Resources/Prototypes/_HL/Traits/Physical.yml
-@@ -127,6 +127,44 @@
+@@ -127,6 +127,49 @@
          coefficients:
            Cold: 0.01
  
@@ -292,7 +411,7 @@ index ed53f094e..0b2bac771 100644
 +  name: drone-name
 +  description: drone-text
 +  category: Physical
-+  cost: 8
++  cost: 6
 +  speciesBlacklist:
 +  - IPC
 +  - Synth
@@ -310,6 +429,11 @@ index ed53f094e..0b2bac771 100644
 +  - type: StaticSpeedModifier
 +    walkModifier: 0.9
 +    sprintModifier: 0.85
++  - type: HeavyFooting
++    stumbleChance: 0.02
++  # Hauling yourself upright in a rubber suit takes a while.
++  - type: LayingDown
++    standingUpTime: 4
 +  # The frame feeds and waters its occupant, so a sealed mouth isn't a slow death sentence.
 +  - type: Hunger
 +    baseDecayRate: 0
