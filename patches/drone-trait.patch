@@ -141,6 +141,66 @@ index 000000000..ba821231e
 +    [ViewVariables]
 +    public EntityUid? GasTankEntity;
 +}
+diff --git a/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs b/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs
+new file mode 100644
+index 000000000..caff623a7
+--- /dev/null
++++ b/Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs
+@@ -0,0 +1,16 @@
++using Robust.Shared.GameStates;
++
++namespace Content.Shared._HL.Movement;
++
++/// <summary>
++/// Permanently scales the movement speed of whatever it is put on.
++/// </summary>
++[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
++public sealed partial class StaticSpeedModifierComponent : Component
++{
++    [DataField, AutoNetworkedField]
++    public float WalkModifier = 1f;
++
++    [DataField, AutoNetworkedField]
++    public float SprintModifier = 1f;
++}
+diff --git a/Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs b/Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs
+new file mode 100644
+index 000000000..10e4125b5
+--- /dev/null
++++ b/Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs
+@@ -0,0 +1,32 @@
++using Content.Shared.Movement.Systems;
++
++namespace Content.Shared._HL.Movement;
++
++public sealed class StaticSpeedModifierSystem : EntitySystem
++{
++    [Dependency] private readonly MovementSpeedModifierSystem _movement = default!;
++
++    public override void Initialize()
++    {
++        base.Initialize();
++
++        SubscribeLocalEvent<StaticSpeedModifierComponent, RefreshMovementSpeedModifiersEvent>(OnRefreshSpeed);
++        SubscribeLocalEvent<StaticSpeedModifierComponent, ComponentStartup>(OnStartup);
++        SubscribeLocalEvent<StaticSpeedModifierComponent, ComponentShutdown>(OnShutdown);
++    }
++
++    private void OnRefreshSpeed(EntityUid uid, StaticSpeedModifierComponent component, RefreshMovementSpeedModifiersEvent args)
++    {
++        args.ModifySpeed(component.WalkModifier, component.SprintModifier);
++    }
++
++    private void OnStartup(EntityUid uid, StaticSpeedModifierComponent component, ComponentStartup args)
++    {
++        _movement.RefreshMovementSpeedModifiers(uid);
++    }
++
++    private void OnShutdown(EntityUid uid, StaticSpeedModifierComponent component, ComponentShutdown args)
++    {
++        _movement.RefreshMovementSpeedModifiers(uid);
++    }
++}
 diff --git a/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs b/Content.Shared/_HL/Nutrition/SealedMouthComponent.cs
 new file mode 100644
 index 000000000..161bfba98
@@ -171,7 +231,7 @@ index 000000000..ac87fdb3b
 @@ -0,0 +1 @@
 +sealed-mouth-cannot-ingest = Your mouth is sealed shut. You can't eat or drink.
 diff --git a/Resources/Locale/en-US/_HL/traits/traits.ftl b/Resources/Locale/en-US/_HL/traits/traits.ftl
-index 7269e99d8..85d42538e 100644
+index 7269e99d8..19f333e27 100644
 --- a/Resources/Locale/en-US/_HL/traits/traits.ftl
 +++ b/Resources/Locale/en-US/_HL/traits/traits.ftl
 @@ -19,6 +19,9 @@ snake-eater-text = Your body is resistant to poison damage, reducing it by 50%.
@@ -179,7 +239,7 @@ index 7269e99d8..85d42538e 100644
  cryo-resistant-text = Your body is highly resistant to cold damage.
  
 +drone-name = Drone
-+drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against half of all electrical shocks, and its tacky soles keep you upright on slippery floors. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. Your mouth is sealed shut in exchange, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
++drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against half of all electrical shocks. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 +
  natural-regen-name = Natural Regeneration
  natural-regen-text = Your body passively heals from minor injuries over time.
@@ -220,10 +280,10 @@ index 000000000..3c9c8209b
 +        - 1.230827 # oxygen
 +      temperature: 293.15
 diff --git a/Resources/Prototypes/_HL/Traits/Physical.yml b/Resources/Prototypes/_HL/Traits/Physical.yml
-index ed53f094e..9bcb7c3f5 100644
+index ed53f094e..7f89e0e80 100644
 --- a/Resources/Prototypes/_HL/Traits/Physical.yml
 +++ b/Resources/Prototypes/_HL/Traits/Physical.yml
-@@ -127,6 +127,42 @@
+@@ -127,6 +127,44 @@
          coefficients:
            Cold: 0.01
  
@@ -232,7 +292,7 @@ index ed53f094e..9bcb7c3f5 100644
 +  name: drone-name
 +  description: drone-text
 +  category: Physical
-+  cost: 6
++  cost: 5
 +  speciesBlacklist:
 +  - IPC
 +  - Synth
@@ -244,9 +304,11 @@ index ed53f094e..9bcb7c3f5 100644
 +  - Heatresistant
 +  replaceComponents: true
 +  components:
-+  - type: NoSlip
 +  - type: InnateInternals
 +  - type: SealedMouth
++  - type: StaticSpeedModifier
++    walkModifier: 0.9
++    sprintModifier: 0.85
 +  # The frame feeds and waters its occupant, so a sealed mouth isn't a slow death sentence.
 +  - type: Hunger
 +    baseDecayRate: 0

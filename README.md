@@ -12,14 +12,13 @@ checkout root. `patches/drone-trait.patch` additionally contains the edits to th
 | --- | --- |
 | ID | `Drone` |
 | Category | `Physical` |
-| Cost | 6 |
+| Cost | 5 |
 | Excludes | `Insulated`, `Heatresistant` |
 | Blocked for | `IPC`, `Synth`, anything with `BorgChassis` |
 
 Upsides:
 
 * Shock damage halved, Blunt and Slash reduced by 15%.
-* `NoSlip` — the tacky soles never slip.
 * Built-in internals: an `integrated rebreather` and an `integrated air reservoir` (3 L, ~18 minutes)
   spawn inside you and are wired into your `Internals`, so internals work with no mask and no carried
   tank. The reservoir's toggle action is granted directly since it never sits in an inventory slot.
@@ -27,6 +26,7 @@ Upsides:
 
 Downsides:
 
+* 10% slower at a walk, 15% slower at a sprint; the rubber is heavy.
 * Heat damage +40%, Caustic damage +30%; latex melts and dissolves.
 * Your mouth is sealed: you can never eat or drink anything, including chemicals and medicine.
 
@@ -37,6 +37,8 @@ Downsides:
   breath tool to `InternalsComponent`, and hands out the tank's internals toggle action.
 * `Content.Shared/_HL/Nutrition/SealedMouthComponent.cs`, `Content.Server/_HL/Nutrition/SealedMouthSystem.cs` —
   cancels `IngestionAttemptEvent` and popups the reason.
+* `Content.Shared/_HL/Movement/StaticSpeedModifierComponent.cs`, `Content.Shared/_HL/Movement/StaticSpeedModifierSystem.cs` —
+  a flat walk/sprint multiplier applied through `RefreshMovementSpeedModifiersEvent`.
 * `Resources/Prototypes/_HL/Entities/Objects/Misc/innate_internals.yml` — the two internal entities.
 * `Resources/Locale/en-US/_HL/nutrition/sealed-mouth.ftl` — the ingestion popup.
 
@@ -50,7 +52,7 @@ Downsides:
   name: drone-name
   description: drone-text
   category: Physical
-  cost: 6
+  cost: 5
   speciesBlacklist:
   - IPC
   - Synth
@@ -62,9 +64,11 @@ Downsides:
   - Heatresistant
   replaceComponents: true
   components:
-  - type: NoSlip
   - type: InnateInternals
   - type: SealedMouth
+  - type: StaticSpeedModifier
+    walkModifier: 0.9
+    sprintModifier: 0.85
   # The frame feeds and waters its occupant, so a sealed mouth isn't a slow death sentence.
   - type: Hunger
     baseDecayRate: 0
@@ -89,7 +93,7 @@ without it the trait system skips components the entity already has.
 
 ```ftl
 drone-name = Drone
-drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against half of all electrical shocks, and its tacky soles keep you upright on slippery floors. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. Your mouth is sealed shut in exchange, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
+drone-text = Your body is sealed in a seamless layer of drone-grade latex. The rubber cushions impacts, dulls blades and insulates you against half of all electrical shocks. An integrated rebreather and air reservoir let you run internals without a mask or tank, and the frame feeds you, so you never hunger or thirst. In exchange the heavy rubber weighs you down, slowing you by 10% at a walk and 15% at a sprint, your mouth is sealed shut, leaving you unable to eat or drink anything, and the latex melts and dissolves with ease, leaving you far more vulnerable to heat and caustic chemicals.
 ```
 
 ## Verification
