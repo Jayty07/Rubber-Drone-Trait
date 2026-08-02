@@ -120,21 +120,3 @@ if (TryComp<InnateInternalsComponent>(user, out var innate) &&
     return (innate.GasTankEntity.Value, innateGasTank);
 }
 ```
-
-## Running it
-
-A full HardLight checkout with this trait applied lives on the [`hardlight-drone`](https://github.com/Jayty07/Rubber-Drone-Trait/tree/hardlight-drone)
-branch.
-
-## Verification
-
-Applied on top of [fenndragon/HardLight](https://github.com/fenndragon/HardLight) at `5d54fc52b6`
-(that fork needs the .NET 10 SDK): `dotnet build Content.Server` reports 0 errors and
-`Content.YAMLLinter` reports "No errors found".
-
-Tested in a live round: the trait appears in character setup with the right cost and description,
-internals run with no mask or tank, eating and drinking are blocked, and the stumble fires while
-moving. The stand-up timer and the speed modifiers were not visually confirmed.
-
-`patches/drone-trait.patch` is a `git format-patch` output against that commit : apply it in a
-HardLight checkout with `git am patches/drone-trait.patch`.
